@@ -5,12 +5,14 @@ import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import AgendamentosScreen from "./src/screens/AgendamentosScreen";
 import NovoAgendamentoScreen from "./src/screens/NovoAgendamentoScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
 
 export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
   Agendamentos: undefined;
   NovoAgendamento: { data: string };
+  Profile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -31,6 +33,7 @@ export default function App() {
         />
         <Stack.Screen name="Agendamentos" component={AgendamentosScreen} />
         <Stack.Screen name="NovoAgendamento" component={NovoAgendamentoScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,84 +1,173 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
 import { agendamentosDB } from "../data/agendamentos";
-import uuid from "react-native-uuid";
 
-type Props = NativeStackScreenProps<RootStackParamList, "NovoAgendamento">;
+type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-export default function NovoAgendamentoScreen({ navigation, route }: Props) {
-  const { data } = route.params;
-  
-  const [nome, setNome] = useState("");
-  const [horario, setHorario] = useState("");
-  const [servico, setServico] = useState("");
+export default function HomeScreen({ navigation }: Props) {
+  const usuario = "Bruno Campos";
 
-  function salvar() {
-    if (!nome || !horario || !servico) {
-      Alert.alert("Erro", "Preencha todos os campos!");
-      return;
-    }
-
-    agendamentosDB.push({
-      id: String(uuid.v4()),
-      nome,
-      horario,
-      servico,
-      data,
-    });
-
-    Alert.alert("OK", "Agendamento salvo!");
-    navigation.goBack();
-  }
+  const ultimosAgendamentos = agendamentosDB.slice(-5).reverse();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Novo Agendamento</Text>
+      
+      {/* Cabeçalho */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.hello}>Olá,</Text>
+          <Text style={styles.username}>{usuario}</Text>
+        </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nome"
-        value={nome}
-        onChangeText={setNome}
+        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+          <Image
+            source={{ uri: "https://i.pravatar.cc/150?img=3" }}
+            style={styles.avatar}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.sectionTitle}>Seus últimos agendamentos</Text>
+
+      {/* LISTAGEM MODERNA */}
+      <FlatList
+        data={ultimosAgendamentos}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            
+            {/* Coluna esquerda com horário */}
+            <View style={styles.cardLeft}>
+              <Text style={styles.cardHorario}>{item.horario}</Text>
+              <Text style={styles.cardData}>{formatarData(item.data)}</Text>
+            </View>
+
+            {/* Coluna central com serviço */}
+            <View style={styles.cardCenter}>
+              <Text style={styles.cardServico}>{item.servico}</Text>
+              <Text style={styles.cardNome}>{item.nome}</Text>
+            </View>
+
+            {/* Coluna direita com valor */}
+            <View style={styles.cardRight}>
+              <Text style={styles.cardValor}>{item.valor}</Text>
+              <Text style={styles.cardIcon}>💈</Text>
+            </View>
+
+          </View>
+        )}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", color: "#777", marginTop: 20 }}>
+            Você ainda não possui agendamentos.
+          </Text>
+        }
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Horário (ex: 14:30)"
-        value={horario}
-        onChangeText={setHorario}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Serviço (ex: Corte, Barba...)"
-        value={servico}
-        onChangeText={setServico}
-      />
-
-      <TouchableOpacity style={styles.botao} onPress={salvar}>
-        <Text style={styles.botaoTexto}>Salvar</Text>
+      {/* Botão inferior */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Agendamentos")}
+      >
+        <Text style={styles.buttonText}>Agendar Novo Corte ✂️</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
 
+/* Função para formatar data YYYY-MM-DD → DD/MM/YYYY */
+function formatarData(data: string) {
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  title: { fontSize: 24, marginBottom: 20, fontWeight: "bold" },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 20,
+  container: {
+    flex: 1,
+    backgroundColor: "#F2F5FC",
+    padding: 20,
   },
-  botao: {
-    backgroundColor: "#1E90FF",
-    padding: 15,
-    borderRadius: 8,
+
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 30,
   },
-  botaoTexto: { color: "#fff", fontSize: 18, textAlign: "center" },
+  hello: { fontSize: 16, color: "#666" },
+  username: { fontSize: 24, fontWeight: "700", color: "#1E1E2F" },
+  avatar: {
+    width: 55,
+    height: 55,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: "#4A6CFF",
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 15,
+    color: "#1E1E2F",
+  },
+
+  /* NOVO LAYOUT DA LISTA */
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 4,
+    alignItems: "center",
+  },
+
+  cardLeft: { width: 70 },
+  cardHorario: { 
+    fontSize: 20, 
+    fontWeight: "700",
+    color: "#4A6CFF"
+  },
+  cardData: { 
+    marginTop: 3, 
+    color: "#777",
+    fontSize: 13
+  },
+
+  cardCenter: { flex: 1, paddingHorizontal: 10 },
+  cardServico: { 
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333"
+  },
+  cardNome: { 
+    marginTop: 3,
+    color: "#666",
+    fontSize: 13
+  },
+
+  cardRight: { width: 80, alignItems: "flex-end" },
+  cardValor: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1E1E2F",
+  },
+  cardIcon: { fontSize: 22, marginTop: 3 },
+
+  button: {
+    backgroundColor: "#4A6CFF",
+    paddingVertical: 15,
+    borderRadius: 12,
+    marginTop: 20,
+  },
+  buttonText: {
+    textAlign: "center",
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
 });
